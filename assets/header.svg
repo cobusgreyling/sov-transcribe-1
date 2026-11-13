@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="SOV-Transcribe-1. The open-weight transcript you keep.">
+  <rect width="1200" height="630" fill="#0c0e12"/>
+  <circle cx="1040" cy="90" r="220" fill="#e7a15a" opacity="0.16"/>
+  <text x="72" y="150" fill="#e7a15a" font-family="ui-monospace, monospace" font-size="18" letter-spacing="4">SALESFORCE MISSIONFORCE · 12 NOV 2026</text>
+  <text x="72" y="270" fill="#efeae2" font-family="Georgia, serif" font-size="78">SOV-Transcribe-1</text>
+  <text x="72" y="340" fill="#f3d2a8" font-family="Georgia, serif" font-size="36">The open-weight transcript you keep.</text>
+  <text x="72" y="470" fill="#efeae2" font-family="Georgia, serif" font-size="28">2.28% AA-WER</text>
+  <text x="330" y="470" fill="#efeae2" font-family="Georgia, serif" font-size="28">#1 open weights</text>
+  <text x="640" y="470" fill="#efeae2" font-family="Georgia, serif" font-size="28">4.6B active</text>
+  <text x="900" y="470" fill="#efeae2" font-family="Georgia, serif" font-size="28">Apache 2.0</text>
+  <text x="72" y="560" fill="#6f695f" font-family="ui-monospace, monospace" font-size="18">Field guide · Cobus Greyling · figures dated on the page</text>
+</svg>

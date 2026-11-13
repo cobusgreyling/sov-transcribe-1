@@ -1,0 +1,17 @@
+# SOV-Transcribe-1 field guide
+
+> Independent notes by Cobus Greyling on Salesforce SOV-Transcribe-1, the open-weight non-streaming speech model released 12 November 2026. Not a Salesforce product. Weights are not in this repository.
+
+SOV-Transcribe-1 pairs a Whisper large-v3 encoder with a Gemma 4 26B A4B decoder. 26.6B parameters, 4.6B active. Apache 2.0. Seven languages. Files up to 30 minutes in the publisher’s tests.
+
+On Salesforce’s 12 November 2026 table the AA-WER index is 2.28%, rank #1 among open weights and #7 overall. The index is half AA-AgentTalk (1.78), a quarter VoxPopuli-AA (1.50), and a quarter Earnings22-AA (4.06). VoiceCodeBench task success is 76.33%, with 93.39% of entities recovered.
+
+The same table has the model behind on the multilingual mean (4.88) and on ContextASR with a fine list. It does not publish speaker labels or streaming.
+
+## Pages
+
+- [Guide](https://cobusgreyling.github.io/sov-transcribe-1/): the reading, the full table, the prompts, the fit check
+- [Essay](https://github.com/cobusgreyling/sov-transcribe-1/blob/main/BLOG.md): prose version of the same evidence
+- [Sources](https://github.com/cobusgreyling/sov-transcribe-1/blob/main/SOURCES.md): the pages behind each number
+- [Model card](https://huggingface.co/salesforce-sovereign-intelligence/SOV-Transcribe-1): the spec
+- [Launch post](https://huggingface.co/blog/salesforce-sovereign-intelligence/sov-transcribe-1): Salesforce, 12 November 2026

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SOV-Transcribe-1 — a field guide</title>
+  <meta name="description" content="Independent field guide to Salesforce SOV-Transcribe-1. Architecture, the 12 November 2026 benchmark table, prompts, and what it takes to run the weights." />
+  <meta property="og:title" content="SOV-Transcribe-1 — a field guide" />
+  <meta property="og:description" content="The open-weight transcript you keep. 2.28% AA-WER, where that lead comes from, and where the table is unkind." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,560&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <nav class="nav">
+    <a class="brand" href="#top">SOV <span>Transcribe-1</span></a>
+    <div class="nav-links">
+      <a href="#board">Board</a>
+      <a href="#jobs">Jobs</a>
+      <a href="#prompts">Prompts</a>
+      <a href="#run">Run</a>
+      <a href="#fit">Fit</a>
+      <a href="BLOG.md">Essay</a>
+      <a href="SOURCES.md">Sources</a>
+    </div>
+  </nav>
+
+  <main class="wrap" id="top">
+    <header class="hero">
+      <p class="eyebrow">Salesforce Missionforce Sovereign AI · 12 Nov 2026</p>
+      <h1>The open-weight transcript you keep.</h1>
+      <p class="lede">SOV-Transcribe-1 is a speech model you download. It writes down a recording in seven languages, follows a plain-language instruction, and can be biased toward the names and terms you care about. The weights are Apache 2.0. The audio can stay on your machines.</p>
+      <p class="sub">This is an independent field guide by Cobus Greyling. It is not a Salesforce product, and nothing on this page is a live transcript from the model. Every figure is dated and sourced.</p>
+    </header>
+
+    <section class="stats" aria-label="Snapshot">
+      <div class="stat"><b>2.28%</b><span>AA-WER index, 12 Nov 2026</span></div>
+      <div class="stat"><b>#1</b><span>open weights on that board</span></div>
+      <div class="stat"><b>4.6B</b><span>active, of 26.6B total</span></div>
+      <div class="stat"><b>7</b><span>languages, file in, text out</span></div>
+    </section>
+
+    <section class="panel" id="model">
+      <h2>What the weights actually are</h2>
+      <p class="sub">A Whisper encoder hears the file. A small projector turns that hearing into tokens. A Gemma 4 mixture-of-experts writes the transcript. Thinking stays off. Decoding is greedy.</p>
+      <div class="arch">
+        <article class="stage">
+          <div class="k">1 · Hear</div>
+          <h3>Whisper large-v3</h3>
+          <p>16 kHz mono audio. The reference implementation cuts the file into 30-second windows.</p>
+        </article>
+        <div class="arrow" aria-hidden="true">→</div>
+        <article class="stage">
+          <div class="k">2 · Pack</div>
+          <h3>Projector</h3>
+          <p>Four encoder frames are stacked, then a linear layer, GELU, and another linear layer. 375 audio tokens per 30-second window.</p>
+        </article>
+        <div class="arrow" aria-hidden="true">→</div>
+        <article class="stage">
+          <div class="k">3 · Write</div>
+          <h3>Gemma 4 26B A4B</h3>
+          <p>The decoder is the instruction-tuned Gemma 4 mixture-of-experts. The router stays in FP32. The base checkpoint is <code>google/gemma-4-26B-A4B-it</code>.</p>
+        </article>
+      </div>
+      <p class="note">A 30-minute file is 60 windows, which is 22,500 audio tokens before the instruction. The published context is 32,768 tokens. A long transcript can run out of room. Salesforce says to split at speech boundaries when you need to.</p>
+    </section>
+
+    <section class="grid-2">
+      <article class="panel">
+        <h2>Seven languages</h2>
+        <p>English, French, German, Spanish, Italian, Portuguese, Dutch. The launch post calls the English result the headline, and the other six the multilingual set.</p>
+        <div class="langs">
+          <span>English</span><span>French</span><span>German</span><span>Spanish</span><span>Italian</span><span>Portuguese</span><span>Dutch</span>
+        </div>
+      </article>
+      <article class="panel">
+        <h2>One job</h2>
+        <p>Non-streaming automatic speech recognition. You hand it a recording, up to 30 minutes in Salesforce’s tests, plus an instruction. You get text back.</p>
+        <p>The card does not describe live captions, speaker labels, or translation as a separate task. A voice agent that needs those still has to add them.</p>
+      </article>
+    </section>
+
+    <section class="panel" id="board">
+      <h2>Where the 2.28% comes from</h2>
+      <p class="sub">Artificial Analysis builds the AA-WER index from about eight hours of English audio. Half the weight is voice-agent talk. A quarter is parliamentary speech. A quarter is earnings calls. Lower is better. The arithmetic below uses Salesforce’s own table, and it lands on 2.28 exactly.</p>
+      <div class="weight" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="chips">
+        <span class="chip">50% AA-AgentTalk · 1.78</span>
+        <span class="chip">25% VoxPopuli-AA · 1.50</span>
+        <span class="chip">25% Earnings22-AA · 4.06</span>
+      </div>
+      <p class="math">0.50 × 1.78 + 0.25 × 1.50 + 0.25 × 4.06 = 2.28</p>
+      <p>On agent talk, SOV-Transcribe-1 ties Nemotron 3.5 Transcribe at 1.78. The lead is the earnings calls (4.06 against Nemotron’s 5.69 and Voxtral Small’s 4.78) and the parliamentary set (1.50 against 1.99 and 1.75).</p>
+      <p>Salesforce’s table, dated with the 12 November model card, ranks it <strong>#1 among open weights and #7 overall</strong>. Artificial Analysis’s own post that day said #7 of 44. The same organisation’s page, retrieved 13 November 2026, still calls SOV-Transcribe-1 the most accurate open-weights model, at a rounded 2.3%, among 16 open-weights models of 65 evaluated. The rendered summary on that visit did not include a SOV row, so this guide does not invent a fresh overall place.</p>
+      <p class="note">Hosted systems ahead of a 2.3% index on that 13 November page include Fun-Realtime-ASR-preview at 1.7%, ElevenLabs Scribe v3 at 1.9%, Microsoft MAI-Transcribe-2 at 2.0%, and Zoom Scribe V2.1 Pro and Voxtral Small Transcribe 3 at 2.1%. Grok Voice Transcribe 2.0 is listed at 2.3%. Voxtral Small Transcribe 3 is a different model from the Voxtral Small 24B column in Salesforce’s table.</p>
+    </section>
+
+    <section class="panel">
+      <h2>The whole launch table</h2>
+      <p class="sub">Read off the benchmark image on the model card. A green figure is the best published cell in that row. Gold is SOV. A dash was empty in the image. Qwen, Granite, and Voxtral were not given Artificial Analysis cells in that graphic.</p>
+      <div class="table-wrap">
+        <table id="table"></table>
+      </div>
+      <label class="note" for="row-select">Look at one row</label>
+      <div class="toolbar">
+        <select id="row-select" aria-label="Benchmark row"></select>
+      </div>
+      <div class="bars" id="chart"></div>
+      <p class="note" id="chart-note"></p>
+    </section>
+
+    <section class="panel" id="jobs">
+      <h2>Four jobs, and the rows that test them</h2>
+      <div class="jobs">
+        <article class="job">
+          <div class="num">76.33%</div>
+          <h3>The entity has to be perfect</h3>
+          <p>VoiceCodeBench passes a recording only when every target entity is right: a phone number, an email, a URL, a symbol. SOV passes 76.33% of recordings and recovers 93.39% of entities. Nemotron, the only other model filled in, sits at 62.67% and 89.34%. The gap between 93% of entities and 76% of recordings is the product problem. One wrong digit fails the task.</p>
+        </article>
+        <article class="job">
+          <div class="num">8.21%</div>
+          <h3>Fourteen English accents</h3>
+          <p>On AppTek call-center dialogues the mean word error is 8.21%, just ahead of Nemotron at 8.44% and Qwen at 8.42%, and well ahead of Granite and Voxtral. The launch post says this is the lowest error on 8 of the 14 accents: Australian, British, Scottish, Welsh, Irish, Indian, Mexican, and Singaporean English.</p>
+        </article>
+        <article class="job">
+          <div class="num">96.8</div>
+          <h3>Names you hand it</h3>
+          <p>On Contextual Earnings-22, keyword F1 for the names in the clip moves from 71.9 with no list to 96.8 with the local list, and holds 94.0 when the list is the whole hour of names, most of them distractors. Word error on the same family of tests moves from 12.42 to 9.73. Qwen’s word error with a local list is lower still, at 9.19.</p>
+        </article>
+        <article class="job">
+          <div class="num">5.05%</div>
+          <h3>Style you can ask for</h3>
+          <p>Preference-ASR scores whether the transcript follows a requested format. With an instruction, SOV reaches 5.05% preference-aware word error. Granite Speech 5.0 2B is ahead at 4.70%. Without an instruction, SOV leads that table at 5.72%.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <article class="panel">
+        <h2>Where it separates</h2>
+        <ul>
+          <li>AA-WER index: 2.28 against 2.77 and 2.81 for the next open weights in the launch table.</li>
+          <li>HALAS, the hallucination-prone earnings audio: 25.69, ahead of Qwen at 26.01 and Nemotron at 31.59. The margin over Qwen is small.</li>
+          <li>Indian English on Monsoon: 2.93, the best cell in that row.</li>
+          <li>Open ASR VoxPopuli subset: 1.46.</li>
+        </ul>
+      </article>
+      <article class="panel">
+        <h2>Where the table is unkind</h2>
+        <ul>
+          <li>Multilingual mean: 4.88. Voxtral Small is at 3.39 and Nemotron at 3.87. Dutch is the heavy cell, at 7.67.</li>
+          <li>ContextASR with a fine entity list: 3.67, against Qwen at 1.53 and Nemotron at 1.71. The hint helps SOV, from 7.03 down to 3.67, and other models were already ahead.</li>
+          <li>Clean financial speech on SPGISpeech: 2.41, behind Voxtral at 1.84 and Nemotron at 1.91.</li>
+          <li>AMI meetings: 8.15, behind Granite at 6.96 and Nemotron at 7.78.</li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="panel" id="prompts">
+      <h2>The instruction is the product</h2>
+      <p class="sub">Put the instruction in the user message, beside one audio clip. These four lines are the prompt guide on the model card. Replace the braces. Leave thinking disabled.</p>
+      <div class="toolbar" id="prompt-tabs"></div>
+      <div class="prompt-box" id="prompt-box"></div>
+      <div class="row-actions">
+        <button class="copy" id="copy" type="button">Copy prompt</button>
+        <span class="note">Official wording. Not a sample transcript.</span>
+      </div>
+    </section>
+
+    <section class="panel" id="run">
+      <h2>What you run</h2>
+      <p>Native vLLM and Transformers support was still being upstreamed on 12 November 2026. Until that lands, Salesforce ships a plugin that installs vLLM 0.32.0, and the repository carries its own Transformers code. <code>trust_remote_code</code> executes that code. Pin the revision you have read.</p>
+      <pre>hf download salesforce-sovereign-intelligence/SOV-Transcribe-1 \
+  --include "vllm_plugin/*" --local-dir SOV-Transcribe-1
+pip install ./SOV-Transcribe-1/vllm_plugin
+
+vllm serve salesforce-sovereign-intelligence/SOV-Transcribe-1 \
+  --max-model-len 32768
+
+curl http://localhost:8000/v1/audio/transcriptions \
+  -F model=salesforce-sovereign-intelligence/SOV-Transcribe-1 \
+  -F file=@meeting.wav \
+  -F temperature=0</pre>
+      <p>The server accepts 600 seconds of audio unless you set <code>VLLM_MAX_AUDIO_DECODE_DURATION_S=1800</code>. Temperature 0 is the recommended decode. The verbatim prompt is the default. Pass <code>-F prompt=...</code> for any other line.</p>
+      <p>Weights are BF16, with the router in FP32. Holding 26.6 billion BF16 parameters is about 53 GB before the KV cache and the runtime. That figure is arithmetic, not a Salesforce measurement. The published serving test used one NVIDIA RTX PRO 6000 Blackwell with 96 GB.</p>
+      <h3>DFlash, one request at a time</h3>
+      <p class="sub">A separate draft, <code>salesforce-sovereign-intelligence/SOV-Transcribe-1-DFlash</code>, proposes 15 tokens for the main model to check. Salesforce reports about a 2–3× decode speedup, smaller on clips under 10 seconds, with accuracy inside run-to-run variation. On a 96 GB GPU they set <code>max_num_seqs</code> to 64 so the draft still fits. Mean time per request, vLLM 0.32.0, BF16, greedy, clips cut from Earnings-22:</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Audio</th><th>Without draft</th><th>With draft</th></tr>
+          </thead>
+          <tbody id="latency"></tbody>
+        </table>
+      </div>
+      <p>Two other speed figures are easy to mix up. On that same 96 GB GPU, Salesforce reports up to 1,039 seconds of audio transcribed per second of wall clock with the draft, and a 30-second file back in 0.22 seconds. Artificial Analysis measured Salesforce’s hosted endpoint at a speed factor of 60×, about one minute of audio in one second. Throughput under batch and a single hosted request are different experiments.</p>
+    </section>
+
+    <section class="grid-2">
+      <article class="panel">
+        <h2>Keep the decode boring</h2>
+        <ul>
+          <li>Greedy: temperature 0, top-p 1, top-k 0, repetition penalty 1. In Transformers, <code>do_sample</code> stays false.</li>
+          <li>Thinking stays off: <code>enable_thinking</code> false.</li>
+          <li>Rare loops repeat a character or a phrase until the token limit. Salesforce strips them with a cleanup adapted from the Qwen3-ASR toolkit.</li>
+          <li>Allow up to 8,192 new tokens, and split a long file at speech rather than trusting one 30-minute window.</li>
+        </ul>
+      </article>
+      <article class="panel" id="fit">
+        <h2>Does it fit the job?</h2>
+        <form id="fit-form">
+          <fieldset class="fit">
+            <legend>Timing</legend>
+            <label><input type="radio" name="timing" value="file" checked /> I have a recording.</label>
+            <label><input type="radio" name="timing" value="live" /> I need words while the person is still talking.</label>
+          </fieldset>
+          <fieldset class="fit">
+            <legend>Language</legend>
+            <label><input type="radio" name="lang" value="seven" checked /> The speech is in the seven published languages.</label>
+            <label><input type="radio" name="lang" value="other" /> I need another language.</label>
+          </fieldset>
+          <fieldset class="fit">
+            <legend>Speakers</legend>
+            <label><input type="radio" name="speakers" value="no" checked /> I can add speaker labels elsewhere.</label>
+            <label><input type="radio" name="speakers" value="yes" /> I need this model to say who spoke.</label>
+          </fieldset>
+          <fieldset class="fit">
+            <legend>Hardware</legend>
+            <label><input type="radio" name="gpu" value="yes" checked /> I can hold the full weight set on a large GPU.</label>
+            <label><input type="radio" name="gpu" value="no" /> I need this on a laptop GPU.</label>
+          </fieldset>
+        </form>
+        <div class="verdict" id="verdict"></div>
+      </article>
+    </section>
+
+    <section class="panel">
+      <h2>Read next</h2>
+      <p><a href="BLOG.md">The essay</a> walks the same evidence in prose. <a href="SOURCES.md">Sources</a> lists every external page behind a number. The <a href="notebooks/sov_transcribe_1.ipynb">notebook</a> builds a request and refuses to download the weights unless you turn that on. <a href="https://huggingface.co/salesforce-sovereign-intelligence/SOV-Transcribe-1">The model card</a> is still the spec. The technical report was marked “coming soon” on launch day.</p>
+      <p class="note">Missionforce Sovereign AI: Tanay Dixit, Daniel Lee, Ansh Moraje, Aman Gupta, Young Mo Kang, Alexey Dyakov, Kah Mun Chia, John Emmons.</p>
+    </section>
+
+    <footer>
+      Field guide by Cobus Greyling, 13 November 2026. Lab notes in this repository are Apache-2.0. The Salesforce weights are Apache-2.0 and are not vendored here. Figures move when the board adds a model. Check the date on a number before you quote it.
+    </footer>
+  </main>
+  <script src="benchmarks.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

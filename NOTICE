@@ -1,0 +1,6 @@
+SOV-Transcribe-1 field guide
+Copyright 2026 Cobus Greyling
+
+This repository is an independent reading of Salesforce SOV-Transcribe-1.
+It is not a Salesforce product. The model weights are not included.
+They are published by Salesforce under the Apache License 2.0.
