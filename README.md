@@ -10,7 +10,7 @@ This repository is an independent reading of that release: the architecture, the
 
 **Open the guide → [`index.html`](index.html)** · published at <https://cobusgreyling.github.io/sov-transcribe-1/>
 
-**Read the essay → [`BLOG.md`](BLOG.md)** · **Check a number → [`SOURCES.md`](SOURCES.md)**
+**Read the essay → [`BLOG.md`](BLOG.md)** · on the site, [`essay.html`](essay.html) · **Check a number → [`SOURCES.md`](SOURCES.md)** · [`sources.html`](sources.html)
 
 ## The shape of it
 
@@ -48,23 +48,34 @@ vllm serve salesforce-sovereign-intelligence/SOV-Transcribe-1 --max-model-len 32
 
 The [notebook](notebooks/sov_transcribe_1.ipynb) builds the request and stops before any download unless you set `RUN_MODEL = True` on a CUDA machine.
 
+Colab builds the request. It does not hold the weights.
+
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/cobusgreyling/sov-transcribe-1/blob/main/notebooks/sov_transcribe_1.ipynb)
 
 ## Layout
 
 ```
 index.html          the guide
+essay.html          the essay, rendered for the site
+sources.html        the sources, rendered for the site
 benchmarks.js       the launch table, one copy
 app.js              table, bars, prompts, fit check
-BLOG.md             the essay
+BLOG.md             the essay, in Markdown
 SOURCES.md          links behind the numbers
+build_pages.py      renders the two HTML pages from the Markdown
 notebooks/          request builder, inference off by default
-check_sources.py    arithmetic check on the index
+check_sources.py    arithmetic, pins, and the page check
+assets/benchmark-table.png
+                    the model-card image the table was read from
+assets/og.png       share image, 1200 by 630
 ```
 
 ```bash
+python3 build_pages.py
 python3 check_sources.py
 ```
+
+GitHub Actions runs the check on every push and pull request.
 
 ## Licence
 

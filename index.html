@@ -8,6 +8,12 @@
   <meta property="og:title" content="SOV-Transcribe-1 — a field guide" />
   <meta property="og:description" content="The open-weight transcript you keep. 2.28% AA-WER, where that lead comes from, and where the table is unkind." />
   <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://cobusgreyling.github.io/sov-transcribe-1/" />
+  <meta property="og:image" content="https://cobusgreyling.github.io/sov-transcribe-1/assets/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://cobusgreyling.github.io/sov-transcribe-1/assets/og.png" />
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -23,8 +29,8 @@
       <a href="#prompts">Prompts</a>
       <a href="#run">Run</a>
       <a href="#fit">Fit</a>
-      <a href="BLOG.md">Essay</a>
-      <a href="SOURCES.md">Sources</a>
+      <a href="essay.html">Essay</a>
+      <a href="sources.html">Sources</a>
     </div>
   </nav>
 
@@ -42,6 +48,7 @@
       <div class="stat"><b>4.6B</b><span>active, of 26.6B total</span></div>
       <div class="stat"><b>7</b><span>languages, file in, text out</span></div>
     </section>
+    <p class="note">The card sizes the model at 4.6 billion active parameters. The launch post rounds that to 4 billion and calls it six times smaller than Voxtral Small’s 24 billion active. Against the card’s 4.6 billion, twenty-four billion is about five times, not six. Size a machine from the card.</p>
 
     <section class="panel" id="model">
       <h2>What the weights actually are</h2>
@@ -100,10 +107,12 @@
 
     <section class="panel">
       <h2>The whole launch table</h2>
-      <p class="sub">Read off the benchmark image on the model card. A green figure is the best published cell in that row. Gold is SOV. A dash was empty in the image. Qwen, Granite, and Voxtral were not given Artificial Analysis cells in that graphic.</p>
+      <p class="sub">Read off the benchmark image on the model card. Gold is the SOV column. Bold marks every cell that shares the best score in that row, and the word “best” sits on those cells. A dash was empty in the image. Qwen, Granite, and Voxtral were not given Artificial Analysis cells in that graphic.</p>
       <div class="table-wrap">
         <table id="table"></table>
       </div>
+      <p class="note">The public-set mean is 5.44 for SOV. It is the average of the seven English rows in that group. LibriSpeech is not in the group.</p>
+      <p class="note">The cells were read from the model-card image at commit <code>505d8fae243924c0d8acdc622f7f0abab344eba3</code>. <a href="assets/benchmark-table.png">The vendored image</a> is that file.</p>
       <label class="note" for="row-select">Look at one row</label>
       <div class="toolbar">
         <select id="row-select" aria-label="Benchmark row"></select>
@@ -196,7 +205,8 @@ curl http://localhost:8000/v1/audio/transcriptions \
           <tbody id="latency"></tbody>
         </table>
       </div>
-      <p>Two other speed figures are easy to mix up. On that same 96 GB GPU, Salesforce reports up to 1,039 seconds of audio transcribed per second of wall clock with the draft, and a 30-second file back in 0.22 seconds. Artificial Analysis measured Salesforce’s hosted endpoint at a speed factor of 60×, about one minute of audio in one second. Throughput under batch and a single hosted request are different experiments.</p>
+      <p class="note">Three experiments: the table is one-request latency, 1,039 seconds of audio per second is batch throughput on that GPU, and 60× is the hosted endpoint.</p>
+      <p>On that same 96 GB GPU, Salesforce reports the draft returning a 30-second file in 0.22 seconds at that throughput. Artificial Analysis measured the hosted endpoint at about one minute of audio in one second.</p>
     </section>
 
     <section class="grid-2">
@@ -219,7 +229,8 @@ curl http://localhost:8000/v1/audio/transcriptions \
           </fieldset>
           <fieldset class="fit">
             <legend>Language</legend>
-            <label><input type="radio" name="lang" value="seven" checked /> The speech is in the seven published languages.</label>
+            <label><input type="radio" name="lang" value="en" checked /> The speech is English.</label>
+            <label><input type="radio" name="lang" value="six" /> The speech is French, German, Spanish, Italian, Portuguese, or Dutch.</label>
             <label><input type="radio" name="lang" value="other" /> I need another language.</label>
           </fieldset>
           <fieldset class="fit">
@@ -232,6 +243,12 @@ curl http://localhost:8000/v1/audio/transcriptions \
             <label><input type="radio" name="gpu" value="yes" checked /> I can hold the full weight set on a large GPU.</label>
             <label><input type="radio" name="gpu" value="no" /> I need this on a laptop GPU.</label>
           </fieldset>
+          <fieldset class="fit">
+            <legend>The bar</legend>
+            <label><input type="radio" name="job" value="transcript" checked /> A readable transcript is enough.</label>
+            <label><input type="radio" name="job" value="entities" /> Every name, number, email, or URL has to be right.</label>
+            <label><input type="radio" name="job" value="context" /> I will pass a fine list of entities, as on ContextASR.</label>
+          </fieldset>
         </form>
         <div class="verdict" id="verdict"></div>
       </article>
@@ -239,7 +256,7 @@ curl http://localhost:8000/v1/audio/transcriptions \
 
     <section class="panel">
       <h2>Read next</h2>
-      <p><a href="BLOG.md">The essay</a> walks the same evidence in prose. <a href="SOURCES.md">Sources</a> lists every external page behind a number. The <a href="notebooks/sov_transcribe_1.ipynb">notebook</a> builds a request and refuses to download the weights unless you turn that on. <a href="https://huggingface.co/salesforce-sovereign-intelligence/SOV-Transcribe-1">The model card</a> is still the spec. The technical report was marked “coming soon” on launch day.</p>
+      <p><a href="essay.html">The essay</a> walks the same evidence in prose. <a href="sources.html">Sources</a> lists every external page behind a number. The <a href="notebooks/sov_transcribe_1.ipynb">notebook</a> builds a request and refuses to download the weights unless you turn that on. Colab builds the request. It does not hold the weights. <a href="https://huggingface.co/salesforce-sovereign-intelligence/SOV-Transcribe-1">The model card</a> is still the spec. The technical report was marked “coming soon” on launch day.</p>
       <p class="note">Missionforce Sovereign AI: Tanay Dixit, Daniel Lee, Ansh Moraje, Aman Gupta, Young Mo Kang, Alexey Dyakov, Kah Mun Chia, John Emmons.</p>
     </section>
 

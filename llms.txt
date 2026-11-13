@@ -8,10 +8,12 @@ On Salesforce’s 12 November 2026 table the AA-WER index is 2.28%, rank #1 amon
 
 The same table has the model behind on the multilingual mean (4.88) and on ContextASR with a fine list. It does not publish speaker labels or streaming.
 
+The English public-set mean leaves LibriSpeech out. The launch post’s “4 billion” and “6×” are rounded. The card’s active count is 4.6 billion.
+
 ## Pages
 
 - [Guide](https://cobusgreyling.github.io/sov-transcribe-1/): the reading, the full table, the prompts, the fit check
-- [Essay](https://github.com/cobusgreyling/sov-transcribe-1/blob/main/BLOG.md): prose version of the same evidence
-- [Sources](https://github.com/cobusgreyling/sov-transcribe-1/blob/main/SOURCES.md): the pages behind each number
+- [Essay](https://cobusgreyling.github.io/sov-transcribe-1/essay.html): prose version of the same evidence
+- [Sources](https://cobusgreyling.github.io/sov-transcribe-1/sources.html): the pages behind each number
 - [Model card](https://huggingface.co/salesforce-sovereign-intelligence/SOV-Transcribe-1): the spec
 - [Launch post](https://huggingface.co/blog/salesforce-sovereign-intelligence/sov-transcribe-1): Salesforce, 12 November 2026

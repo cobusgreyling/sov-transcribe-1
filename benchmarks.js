@@ -1,8 +1,16 @@
-/* Salesforce launch table, transcribed from the model-card PNG dated 12 Nov 2026.
+/* Salesforce launch table, transcribed from assets/benchmark-table.png.
+   That file is the model-card image at the revision in source.revision.
    Null means the cell was a dash. Ranks are kept beside the index, not inside scores. */
 window.BENCH = {
   "asOf": "2026-11-12",
   "checked": "2026-11-13",
+  "source": {
+    "repo": "salesforce-sovereign-intelligence/SOV-Transcribe-1",
+    "revision": "505d8fae243924c0d8acdc622f7f0abab344eba3",
+    "image": "assets/benchmark-table.png",
+    "imageSha256": "45e3b6a5a095a83d77370fa1e90e9dc2317a32041bace313f7b6913e1c9e1840",
+    "retrieved": "2026-11-13"
+  },
   "models": [
     {"id": "sov", "name": "SOV-Transcribe-1", "short": "SOV"},
     {"id": "nemotron", "name": "Nemotron 3.5 Transcribe", "short": "Nemotron"},

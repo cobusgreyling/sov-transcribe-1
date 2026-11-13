@@ -2,7 +2,11 @@
 
 Figures on the guide were checked on 13 November 2026. The launch table is Salesforce’s. The live board is Artificial Analysis’s, and it had already moved. When the two disagree, both are shown with their dates.
 
-The numeric table in [`benchmarks.js`](benchmarks.js) was read from the PNG on the model card, then read again in four crops. `python3 check_sources.py` recomputes the AA-WER index from those cells.
+The numeric table in [`benchmarks.js`](benchmarks.js) was read from the PNG on the model card, then read again in four crops. `python3 check_sources.py` recomputes the AA-WER index, the English public-set mean, and the multilingual mean from those cells.
+
+## Pinned revision
+
+Retrieved 13 November 2026. The model card commit is `505d8fae243924c0d8acdc622f7f0abab344eba3`. The benchmark image at that commit is vendored as [`assets/benchmark-table.png`](assets/benchmark-table.png). Its SHA-256 is stored on `source.imageSha256` in [`benchmarks.js`](benchmarks.js). `python3 check_sources.py` recomputes the hash.
 
 ## Primary
 

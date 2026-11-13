@@ -7,26 +7,46 @@
     return Number(n).toFixed(2);
   }
 
-  function bestId(row) {
-    let winner = null;
+  function bestIds(row) {
     let best = null;
+    const ids = [];
     models.forEach(function (m) {
       const v = row.scores[m.id];
       if (v === null || v === undefined) return;
-      if (best === null) {
+      const better = best !== null && (row.better === "high" ? v > best : v < best);
+      if (best === null || better) {
         best = v;
-        winner = m.id;
-        return;
-      }
-      const better = row.better === "high" ? v > best : v < best;
-      if (better) {
-        best = v;
-        winner = m.id;
+        ids.length = 0;
+        ids.push(m.id);
       } else if (v === best) {
-        winner = null;
+        ids.push(m.id);
       }
     });
-    return winner;
+    return ids;
+  }
+
+  function modelName(id) {
+    return models.filter(function (m) { return m.id === id; })[0].name;
+  }
+
+  function joinNames(ids) {
+    const names = ids.map(modelName);
+    if (names.length < 2) return names[0] || "";
+    if (names.length === 2) return names[0] + " and " + names[1];
+    return names.slice(0, -1).join(", ") + ", and " + names[names.length - 1];
+  }
+
+  function groupLabel(group) {
+    if (group.unit && group.unit !== "mixed") return group.title + " · " + group.unit;
+    if (group.unit === "mixed") return group.title + " · units differ by row";
+    return group.title;
+  }
+
+  function rowLabel(row, group) {
+    let label = row.name;
+    if (group.unit === "mixed" && row.unit) label += " · " + row.unit;
+    if (row.better === "high") label += " · higher is better";
+    return label;
   }
 
   const table = document.getElementById("table");
@@ -41,21 +61,27 @@
     const label = document.createElement("tr");
     label.className = "group";
     const cell = document.createElement("td");
-    cell.colSpan = 6;
-    cell.textContent = group.title;
+    cell.colSpan = models.length + 1;
+    cell.textContent = groupLabel(group);
     label.appendChild(cell);
     tbody.appendChild(label);
     group.rows.forEach(function (row) {
       const tr = document.createElement("tr");
-      const winner = bestId(row);
+      const winners = bestIds(row);
       const name = document.createElement("td");
-      name.textContent = row.name;
+      name.textContent = rowLabel(row, group);
       tr.appendChild(name);
       models.forEach(function (m) {
         const td = document.createElement("td");
         td.textContent = fmt(row.scores[m.id]);
         if (m.id === "sov") td.classList.add("sov");
-        if (winner === m.id) td.classList.add("best");
+        if (winners.indexOf(m.id) !== -1) {
+          td.classList.add("best");
+          const mark = document.createElement("span");
+          mark.className = "mark";
+          mark.textContent = "best";
+          td.appendChild(mark);
+        }
         tr.appendChild(td);
       });
       tbody.appendChild(tr);
@@ -88,7 +114,7 @@
       return v !== null && v !== undefined;
     });
     const max = Math.max.apply(null, values);
-    const winner = bestId(row);
+    const winners = bestIds(row);
     chart.innerHTML = "";
     models.forEach(function (m) {
       const v = row.scores[m.id];
@@ -109,9 +135,13 @@
       wrap.appendChild(num);
       chart.appendChild(wrap);
     });
+    const unit = row.unit || (item.group.unit && item.group.unit !== "mixed" ? item.group.unit : "");
     const dir = row.better === "high" ? "Higher is better." : "Lower is better.";
-    const who = winner ? models.filter(function (m) { return m.id === winner; })[0].name + " leads this row." : "This row is a tie at the best score.";
-    chartNote.textContent = dir + " " + who + " A dash means Salesforce left that cell empty. Bars share one scale, so a small gap stays small.";
+    let who = "No score is published in this row.";
+    if (winners.length > 1) who = joinNames(winners) + " tie at the best score.";
+    else if (winners.length === 1) who = joinNames(winners) + " leads this row.";
+    const unitSentence = unit ? " Unit: " + unit + "." : "";
+    chartNote.textContent = dir + " " + who + unitSentence + " A dash means Salesforce left that cell empty. Bars share one scale, so a small gap stays small.";
   }
   select.addEventListener("change", draw);
   draw();
@@ -153,28 +183,49 @@
 
   const form = document.getElementById("fit-form");
   const verdict = document.getElementById("verdict");
+  function paragraph(text) {
+    const p = document.createElement("p");
+    p.textContent = text;
+    return p;
+  }
   function assess() {
     const data = new FormData(form);
-    const reasons = [];
+    const blockers = [];
     if (data.get("timing") === "live") {
-      reasons.push("You need words while someone is still talking. This model transcribes a file after the fact.");
+      blockers.push("You need words while someone is still talking. This model transcribes a file after the fact.");
     }
     if (data.get("lang") === "other") {
-      reasons.push("The published language set is English, French, German, Spanish, Italian, Portuguese, and Dutch.");
+      blockers.push("The published language set is English, French, German, Spanish, Italian, Portuguese, and Dutch.");
     }
     if (data.get("speakers") === "yes") {
-      reasons.push("The model card does not offer speaker labels. A diariser has to sit beside it.");
+      blockers.push("The model card does not offer speaker labels. A diariser has to sit beside it.");
     }
     if (data.get("gpu") === "no") {
-      reasons.push("The full 26.6B weights have to sit in memory. Salesforce measured serving on a 96 GB GPU.");
+      blockers.push("The full 26.6B weights have to sit in memory. Salesforce measured serving on a 96 GB GPU.");
     }
-    if (reasons.length === 0) {
-      verdict.className = "verdict yes";
-      verdict.textContent = "This is the job the model was built for: a recording in one of the seven languages, entities and wording you can steer, audio that stays on machines you run.";
-    } else {
+    verdict.replaceChildren();
+    if (blockers.length) {
       verdict.className = "verdict no";
-      verdict.textContent = reasons.join(" ");
+      verdict.appendChild(paragraph("Not runnable for this job. " + blockers.join(" ")));
+      return;
     }
+    const warns = [];
+    const leads = [];
+    if (data.get("lang") === "six") {
+      warns.push("It runs in French, German, Spanish, Italian, Portuguese, and Dutch. The multilingual mean is 4.88% word error, behind Voxtral Small at 3.39 and Nemotron at 3.87. Dutch is 7.67. That is a different result from the English index.");
+    }
+    if (data.get("job") === "context") {
+      warns.push("On ContextASR with a fine list, SOV is at 3.67, Qwen at 1.53, and Nemotron at 1.71. The hint moves SOV from 7.03 to 3.67. The lead on that row stays with the other models.");
+    } else if (data.get("job") === "entities") {
+      leads.push("VoiceCodeBench is the matching row. SOV passes 76.33% of recordings and recovers 93.39% of entities. Nemotron, the other model filled in, sits at 62.67% and 89.34%. One wrong digit still fails the recording.");
+    } else if (data.get("lang") === "en") {
+      leads.push("On the English AA-WER index, the launch table puts SOV first among the open weights it lists, at 2.28.");
+    }
+    verdict.className = warns.length ? "verdict mix" : "verdict yes";
+    verdict.appendChild(paragraph("Runnable. The job is a recording, in a language the card publishes, with speaker labels added elsewhere, on a GPU that can hold the full weights."));
+    warns.concat(leads).forEach(function (text) {
+      verdict.appendChild(paragraph(text));
+    });
   }
   form.addEventListener("change", assess);
   assess();
